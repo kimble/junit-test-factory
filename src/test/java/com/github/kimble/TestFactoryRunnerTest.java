@@ -1,8 +1,6 @@
 package com.github.kimble;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
@@ -25,6 +23,16 @@ public class TestFactoryRunnerTest implements TestFactory {
     @After
     public void doAfterEachTest() {
         System.out.println("After...");
+    }
+
+    @BeforeClass
+    public static void doBeforeAnythingElse() {
+        System.out.println("Before anything else");
+    }
+
+    @AfterClass
+    public static void doAfterEverything() {
+        System.out.println("This is the very last thing to be done");
     }
 
     @Override
