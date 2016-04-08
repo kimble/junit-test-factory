@@ -74,11 +74,11 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
         try {
             statement.evaluate();
         }
-        catch (AssumptionViolatedException e) {
-            eachNotifier.addFailedAssumption(e);
+        catch (AssumptionViolatedException ex) {
+            eachNotifier.addFailedAssumption(ex);
         }
-        catch (Throwable e) {
-            eachNotifier.addFailure(e);
+        catch (Throwable ex) {
+            eachNotifier.addFailure(ex);
         }
         finally {
             eachNotifier.fireTestFinished();
@@ -86,23 +86,34 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
     }
 
     private Statement createStatement(GeneratedTest test, Description description) {
-        Statement invokeTest = new InvokeGeneratedTest(test);
+        Statement invokeTest = new GeneratedTestStatementAdapter(test);
         Statement withBefores = withBefores(invokeTest);
         Statement withAfters = withAfters(withBefores);
-        Statement withRules = withRules(description, withAfters);
 
 
-        return withRules;
+        return withRules(description, withAfters);
     }
 
-    protected Statement withBefores(Statement statement) {
+    private Statement withBefores(Statement statement) {
         List<FrameworkMethod> befores = getTestClass().getAnnotatedMethods(Before.class);
-        return befores.isEmpty() ? statement : new RunBefores(statement, befores, factoryInstance);
+
+        if (befores.isEmpty()) {
+            return statement;
+        }
+        else {
+            return new RunBefores(statement, befores, factoryInstance);
+        }
     }
 
-    protected Statement withAfters(Statement statement) {
+    private Statement withAfters(Statement statement) {
         List<FrameworkMethod> afters = getTestClass().getAnnotatedMethods(After.class);
-        return afters.isEmpty() ? statement : new RunAfters(statement, afters, factoryInstance);
+
+        if (afters.isEmpty()) {
+            return statement;
+        }
+        else {
+            return new RunAfters(statement, afters, factoryInstance);
+        }
     }
 
     private RunRules withRules(Description description, Statement invokeTest) {
@@ -121,11 +132,11 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
     }
 
 
-    private static class InvokeGeneratedTest extends Statement {
+    private static class GeneratedTestStatementAdapter extends Statement {
 
         private final GeneratedTest generatedTest;
 
-        private InvokeGeneratedTest(GeneratedTest generatedTest) {
+        private GeneratedTestStatementAdapter(GeneratedTest generatedTest) {
             this.generatedTest = generatedTest;
         }
 
