@@ -23,6 +23,8 @@ public class TestFactoryRunnerTest implements TestFactory {
 
             sink.accept(name, () -> {
                 System.out.println("Yey! " + number);
+                System.out.println(" => " + tmp.getRoot());
+
                 assertNotNull(tmp);
                 assertTrue(tmp.getRoot().exists());
             });
