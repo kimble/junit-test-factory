@@ -1,14 +1,19 @@
 package com.github.kimble;
 
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
+import org.junit.internal.runners.statements.RunAfters;
+import org.junit.internal.runners.statements.RunBefores;
 import org.junit.rules.RunRules;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
+import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
@@ -82,10 +87,29 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
 
     private Statement createStatement(GeneratedTest test, Description description) {
         Statement invokeTest = new InvokeGeneratedTest(test);
-        RunRules withRules = new RunRules(invokeTest, getTestRules(factoryInstance), description);
+        Statement withBefores = withBefores(invokeTest);
+        Statement withAfters = withAfters(withBefores);
+        Statement withRules = withRules(description, withAfters);
 
 
         return withRules;
+    }
+
+    protected Statement withBefores(Statement statement) {
+        List<FrameworkMethod> befores = getTestClass().getAnnotatedMethods(Before.class);
+        return befores.isEmpty() ? statement : new RunBefores(statement, befores, factoryInstance);
+    }
+
+    protected Statement withAfters(Statement statement) {
+        List<FrameworkMethod> afters = getTestClass().getAnnotatedMethods(After.class);
+        return afters.isEmpty() ? statement : new RunAfters(statement, afters, factoryInstance);
+    }
+
+    private RunRules withRules(Description description, Statement invokeTest) {
+        List<TestRule> result = getTestClass().getAnnotatedMethodValues(factoryInstance, Rule.class, TestRule.class);
+        result.addAll(getTestClass().getAnnotatedFieldValues(factoryInstance, Rule.class, TestRule.class));
+
+        return new RunRules(invokeTest, result, description);
     }
 
     private static Class<?> verify(Class<?> testClass) throws InitializationError {
@@ -94,13 +118,6 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
         }
 
         return testClass;
-    }
-
-    private List<TestRule> getTestRules(Object target) {
-        List<TestRule> result = getTestClass().getAnnotatedMethodValues(target, Rule.class, TestRule.class);
-        result.addAll(getTestClass().getAnnotatedFieldValues(target, Rule.class, TestRule.class));
-
-        return result;
     }
 
 

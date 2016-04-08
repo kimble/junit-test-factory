@@ -1,5 +1,7 @@
 package com.github.kimble;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
@@ -14,6 +16,16 @@ public class TestFactoryRunnerTest implements TestFactory {
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
+
+    @Before
+    public void doBeforeEachTest() {
+        System.out.println("Before...");
+    }
+
+    @After
+    public void doAfterEachTest() {
+        System.out.println("After...");
+    }
 
     @Override
     public void produceTests(BiConsumer<String, GeneratedTest> sink) {
