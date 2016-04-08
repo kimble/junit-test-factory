@@ -6,13 +6,13 @@ This can be pretty convenient for adding customer generated test data into your 
 
 Btw, as far as I can tell, doing these things will be easier with JUnit 5.
 
-Tester
+Teaser
 ------
 
     package com.github.kimble;
 
     import org.junit.runner.RunWith;
-    
+
     import java.util.function.BiConsumer;
 
     import static org.junit.Assert.assertNotNull;

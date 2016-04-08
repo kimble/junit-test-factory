@@ -17,6 +17,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
+import java.lang.annotation.Annotation;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,14 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
         return tests.get(child);
     }
 
+    private static Class<?> verify(Class<?> testClass) throws InitializationError {
+        if (!TestFactory.class.isAssignableFrom(testClass)) {
+            throw new InitializationError(testClass + " must implement " + TestFactory.class);
+        }
+
+        return testClass;
+    }
+
     @Override
     protected void runChild(GeneratedTest test, RunNotifier notifier) {
         Description description = tests.get(test);
@@ -95,7 +104,7 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
     }
 
     private Statement withBefores(Statement statement) {
-        List<FrameworkMethod> befores = getTestClass().getAnnotatedMethods(Before.class);
+        List<FrameworkMethod> befores = methodsAnnotatedWith(Before.class);
 
         if (befores.isEmpty()) {
             return statement;
@@ -106,7 +115,7 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
     }
 
     private Statement withAfters(Statement statement) {
-        List<FrameworkMethod> afters = getTestClass().getAnnotatedMethods(After.class);
+        List<FrameworkMethod> afters = methodsAnnotatedWith(After.class);
 
         if (afters.isEmpty()) {
             return statement;
@@ -123,12 +132,8 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
         return new RunRules(invokeTest, result, description);
     }
 
-    private static Class<?> verify(Class<?> testClass) throws InitializationError {
-        if (!TestFactory.class.isAssignableFrom(testClass)) {
-            throw new InitializationError(testClass + " must implement " + TestFactory.class);
-        }
-
-        return testClass;
+    private List<FrameworkMethod> methodsAnnotatedWith(Class<? extends Annotation> annotationClass) {
+        return getTestClass().getAnnotatedMethods(annotationClass);
     }
 
 
