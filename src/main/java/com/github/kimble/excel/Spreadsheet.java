@@ -40,7 +40,7 @@ public class Spreadsheet {
     }
 
 
-    public S getSheet(String name) {
+    public S sheetNamed(String name) {
         Sheet sheet = workbook.getSheet(name);
         return new S(sheet);
     }

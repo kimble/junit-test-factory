@@ -17,26 +17,22 @@ public class SpreadsheetTest extends SpreadsheetDrivenTest {
 
     @Override
     void produceTests(Spreadsheet spreadsheet, BiConsumer<String, GeneratedTest> sink) {
-        spreadsheet.getSheet("plus").streamRowsSkippingHeader(r -> {
+        spreadsheet.sheetNamed("plus").streamRowsSkippingHeader(r -> {
             int a = r.intColumn(0);
             int b = r.intColumn(1);
             int sum = r.intColumn(2);
 
             String name = String.format("Addition: %d + %d = %d", a, b, sum);
-            sink.accept(name, () -> {
-                assertEquals(name, sum, a + b);
-            });
+            sink.accept(name, () -> assertEquals(name, sum, a + b));
         });
 
-        spreadsheet.getSheet("minus").streamRowsSkippingHeader(r -> {
+        spreadsheet.sheetNamed("minus").streamRowsSkippingHeader(r -> {
             int a = r.intColumn(0);
             int b = r.intColumn(1);
             int sum = r.intColumn(2);
 
             String name = String.format("Subtraction: %d - %d = %d", a, b, sum);
-            sink.accept(name, () -> {
-                assertEquals(name, sum, a - b);
-            });
+            sink.accept(name, () -> assertEquals(name, sum, a - b));
         });
     }
 
