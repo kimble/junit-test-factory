@@ -1,4 +1,19 @@
-apply plugin: 'java'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
+    }
+}
+
+apply plugin: "com.jfrog.bintray"
+apply plugin: "maven-publish"
+apply plugin: "java"
+
+
+group = 'com.github.kimble'
+version = '4.12.1'
 
 repositories {
     jcenter()
@@ -9,7 +24,101 @@ dependencies {
     compile 'org.apache.poi:poi:3.14',
             'org.apache.poi:poi-ooxml:3.14'
 
-
-
     testCompile 'org.assertj:assertj-core:3.4.0'
 }
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    options.encoding = 'UTF-8'
+    options.compilerArgs = [
+            "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
+            "-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
+            "-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
+            "-Xlint:fallthrough", "-Xlint:rawtypes",
+            "-Xlint:unchecked", "-Xlint:-options", "-Werror"
+    ]
+}
+
+compileTestJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    options.encoding = 'UTF-8'
+    options.compilerArgs = [
+            "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
+            "-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
+            "-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
+            "-Xlint:-fallthrough", "-Xlint:-rawtypes", "-Xlint:-deprecation",
+            "-Xlint:-unchecked", "-Xlint:-options"
+    ]
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar {
+                classifier "sources"
+            }
+
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+        }
+    }
+}
+
+if (System.getenv("BINTRAY_USER") && System.getenv("BINTRAY_KEY")) {
+    bintray {
+        user = System.getenv("BINTRAY_USER")
+        key = System.getenv("BINTRAY_KEY")
+
+        publications = [ 'mavenJava' ]
+
+        dryRun = false
+        publish = true
+
+        pkg { //package will be created if does not exist
+            repo = 'maven'
+            name = 'junit-test-factory'
+            desc = 'Simple junit runner for dynamically generating tests'
+
+            websiteUrl = 'https://github.com/kimble/junit-test-factory'
+            issueTrackerUrl = 'https://github.com/kimble/junit-test-factory/issues'
+            vcsUrl = 'https://github.com/kimble/junit-test-factory.git'
+            githubRepo = 'kimble/junit-test-factory'
+            githubReleaseNotesFile = 'readme.md'
+
+            licenses = ['Apache-2.0']
+            labels = ['java', 'junit', 'testing']
+
+            publicDownloadNumbers = true
+        }
+    }
+}
+else {
+    logger.debug("Set bintrayUser and bintrayKey in ~/.gradle/gradle.properties to enable bintray upload")
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.12'
+}
+
