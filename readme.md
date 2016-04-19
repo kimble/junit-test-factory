@@ -1,6 +1,8 @@
 JUnit test factory runner
 =========================
 
+[ ![Download](https://api.bintray.com/packages/kim-betti/maven/junit-test-factory/images/download.svg) ](https://bintray.com/kim-betti/maven/junit-test-factory/_latestVersion)
+
 Simple JUnit runner allowing you to dynamically generate tests with human readable names.
 This can be pretty convenient for adding customer generated test data into your test suites.
 
