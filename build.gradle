@@ -13,7 +13,7 @@ apply plugin: "java"
 
 
 group = 'com.github.kimble'
-version = '4.12.1'
+version = '4.12.2'
 
 repositories {
     jcenter()
