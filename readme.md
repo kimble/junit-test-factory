@@ -36,3 +36,10 @@ Teaser
         }
 
     }
+    
+
+### Gradle test report 
+![Gradle test report](https://github.com/kimble/junit-test-factory/blob/master/docs/teaser/gradle-report.png)
+
+### Intellij test runner
+![Intellij test runner](https://github.com/kimble/junit-test-factory/blob/master/docs/teaser/intellij-report.png)
