@@ -1,8 +1,6 @@
 package com.github.kimble.excel;
 
-import com.github.kimble.GeneratedTest;
-import com.github.kimble.TestFactory;
-import com.github.kimble.TestFactoryRunner;
+import com.github.kimble.FactoryRunner;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
@@ -11,12 +9,12 @@ import java.net.URL;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-@RunWith(TestFactoryRunner.class)
-public abstract class SpreadsheetDrivenTest implements TestFactory {
+@RunWith(FactoryRunner.class)
+public abstract class SpreadsheetDrivenTest implements FactoryRunner.Producer {
 
 
     @Override
-    public final void produceTests(BiConsumer<String, GeneratedTest> sink) {
+    public final void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
         try {
             Spreadsheet spreadsheet = new Spreadsheet(supplySpreadsheet());
             produceTests(spreadsheet, sink);
@@ -28,7 +26,7 @@ public abstract class SpreadsheetDrivenTest implements TestFactory {
 
     protected abstract Supplier<InputStream> supplySpreadsheet();
 
-    abstract void produceTests(Spreadsheet spreadsheet, BiConsumer<String, GeneratedTest> sink);
+    abstract void produceTests(Spreadsheet spreadsheet, BiConsumer<String, FactoryRunner.Test> sink);
 
 
     final Supplier<InputStream> fromClasspath(String cp) {

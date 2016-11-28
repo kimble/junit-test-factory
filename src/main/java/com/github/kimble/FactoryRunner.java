@@ -21,24 +21,25 @@ import java.lang.annotation.Annotation;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 
-public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
+public class FactoryRunner extends ParentRunner<FactoryRunner.Test> {
 
-    private final TestFactory factoryInstance;
+    private final Producer factoryInstance;
 
-    private final Map<GeneratedTest, Description> tests = new LinkedHashMap<>();
+    private final Map<Test, Description> tests = new LinkedHashMap<>();
 
-    public TestFactoryRunner(Class<?> testClass) throws InitializationError {
+    public FactoryRunner(Class<?> testClass) throws InitializationError {
         super(verify(testClass));
 
         factoryInstance = createInstance(testClass);
     }
 
-    private TestFactory createInstance(Class<?> testClass) throws InitializationError {
+    private Producer createInstance(Class<?> testClass) throws InitializationError {
         try {
-            return (TestFactory) testClass.newInstance();
+            return (Producer) testClass.newInstance();
         }
         catch (Exception ex) {
             throw new InitializationError(ex);
@@ -46,7 +47,7 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
     }
 
     @Override
-    protected List<GeneratedTest> getChildren() {
+    protected List<Test> getChildren() {
         Class<?> testClass = factoryInstance.getClass();
 
         factoryInstance.produceTests((name, test) -> {
@@ -60,20 +61,20 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
     }
 
     @Override
-    protected Description describeChild(GeneratedTest child) {
+    protected Description describeChild(Test child) {
         return tests.get(child);
     }
 
     private static Class<?> verify(Class<?> testClass) throws InitializationError {
-        if (!TestFactory.class.isAssignableFrom(testClass)) {
-            throw new InitializationError(testClass + " must implement " + TestFactory.class);
+        if (!Producer.class.isAssignableFrom(testClass)) {
+            throw new InitializationError(testClass + " must implement " + Producer.class);
         }
 
         return testClass;
     }
 
     @Override
-    protected void runChild(GeneratedTest test, RunNotifier notifier) {
+    protected void runChild(Test test, RunNotifier notifier) {
         Description description = tests.get(test);
         EachTestNotifier eachNotifier = new EachTestNotifier(notifier, description);
         eachNotifier.fireTestStarted();
@@ -94,7 +95,7 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
         }
     }
 
-    private Statement createStatement(GeneratedTest test, Description description) {
+    private Statement createStatement(Test test, Description description) {
         Statement invokeTest = new GeneratedTestStatementAdapter(test);
         Statement withBefores = withBefores(invokeTest);
         Statement withAfters = withAfters(withBefores);
@@ -139,17 +140,32 @@ public class TestFactoryRunner extends ParentRunner<GeneratedTest> {
 
     private static class GeneratedTestStatementAdapter extends Statement {
 
-        private final GeneratedTest generatedTest;
+        private final Test test;
 
-        private GeneratedTestStatementAdapter(GeneratedTest generatedTest) {
-            this.generatedTest = generatedTest;
+        private GeneratedTestStatementAdapter(Test test) {
+            this.test = test;
         }
 
         @Override
         public void evaluate() throws Throwable {
-            generatedTest.execute();
+            test.execute();
         }
 
     }
+
+    @FunctionalInterface
+    public interface Test {
+
+        void execute() throws Throwable;
+
+    }
+
+    @FunctionalInterface
+    public interface Producer {
+
+        void produceTests(BiConsumer<String, Test> sink);
+
+    }
+
 
 }

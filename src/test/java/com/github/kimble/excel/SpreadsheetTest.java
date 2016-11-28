@@ -1,6 +1,7 @@
 package com.github.kimble.excel;
 
-import com.github.kimble.GeneratedTest;
+
+import com.github.kimble.FactoryRunner;
 
 import java.io.InputStream;
 import java.util.function.BiConsumer;
@@ -16,7 +17,7 @@ public class SpreadsheetTest extends SpreadsheetDrivenTest {
     }
 
     @Override
-    void produceTests(Spreadsheet spreadsheet, BiConsumer<String, GeneratedTest> sink) {
+    void produceTests(Spreadsheet spreadsheet, BiConsumer<String, FactoryRunner.Test> sink) {
         spreadsheet.sheetNamed("plus").streamRowsSkippingHeader(r -> {
             int a = r.intColumn(0);
             int b = r.intColumn(1);

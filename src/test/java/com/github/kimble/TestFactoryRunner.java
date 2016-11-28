@@ -1,6 +1,10 @@
 package com.github.kimble;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
@@ -9,8 +13,8 @@ import java.util.function.BiConsumer;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(TestFactoryRunner.class)
-public class TestFactoryRunnerTest implements TestFactory {
+@RunWith(FactoryRunner.class)
+public class TestFactoryRunner implements FactoryRunner.Producer {
 
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -36,7 +40,7 @@ public class TestFactoryRunnerTest implements TestFactory {
     }
 
     @Override
-    public void produceTests(BiConsumer<String, GeneratedTest> sink) {
+    public void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
         for (int i=0; i<10; i++) {
             final int number = i;
             final String name = String.format("Test %d", number);
