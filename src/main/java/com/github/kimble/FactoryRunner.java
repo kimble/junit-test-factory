@@ -18,19 +18,18 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
 import java.lang.annotation.Annotation;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 
-public class FactoryRunner extends ParentRunner<FactoryRunner.Test> {
+public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
 
     private final Producer factoryInstance;
 
-    private final Map<Test, Description> tests = new LinkedHashMap<>();
+    private final List<DescribedTest> tests = new ArrayList<>();
 
+    @SuppressWarnings("WeakerAccess")
     public FactoryRunner(Class<?> testClass) throws InitializationError {
         super(verify(testClass));
 
@@ -47,22 +46,20 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.Test> {
     }
 
     @Override
-    protected List<Test> getChildren() {
+    protected List<DescribedTest> getChildren() {
         Class<?> testClass = factoryInstance.getClass();
 
         factoryInstance.produceTests((name, test) -> {
             Description description = Description.createTestDescription(testClass, name);
-            tests.put(test, description);
+            tests.add(new DescribedTest(test, description));
         });
 
-        return tests.keySet()
-                .stream()
-                .collect(Collectors.toList());
+        return tests;
     }
 
     @Override
-    protected Description describeChild(Test child) {
-        return tests.get(child);
+    protected Description describeChild(DescribedTest describedTest) {
+        return describedTest.description();
     }
 
     private static Class<?> verify(Class<?> testClass) throws InitializationError {
@@ -74,12 +71,11 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.Test> {
     }
 
     @Override
-    protected void runChild(Test test, RunNotifier notifier) {
-        Description description = tests.get(test);
-        EachTestNotifier eachNotifier = new EachTestNotifier(notifier, description);
+    protected void runChild(DescribedTest describedTest, RunNotifier notifier) {
+        EachTestNotifier eachNotifier = new EachTestNotifier(notifier, describedTest.description());
         eachNotifier.fireTestStarted();
 
-        Statement statement = createStatement(test, description);
+        Statement statement = createStatement(describedTest);
 
         try {
             statement.evaluate();
@@ -95,12 +91,14 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.Test> {
         }
     }
 
-    private Statement createStatement(Test test, Description description) {
-        Statement invokeTest = new GeneratedTestStatementAdapter(test);
+
+
+    private Statement createStatement(DescribedTest describedTest) {
+        Statement invokeTest = new GeneratedTestStatementAdapter(describedTest.test());
         Statement withBefores = withBefores(invokeTest);
         Statement withAfters = withAfters(withBefores);
 
-
+        Description description = describedTest.description();
         return withRules(description, withAfters);
     }
 
@@ -164,6 +162,31 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.Test> {
     public interface Producer {
 
         void produceTests(BiConsumer<String, Test> sink);
+
+    }
+
+    static class DescribedTest {
+
+        private final Test test;
+        private final Description description;
+
+        DescribedTest(Test test, Description description) {
+            this.description = description;
+            this.test = test;
+        }
+
+        Test test() {
+            return test;
+        }
+
+        Description description() {
+            return description;
+        }
+
+        @Override
+        public String toString() {
+            return description.toString();
+        }
 
     }
 
