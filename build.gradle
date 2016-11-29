@@ -1,15 +1,10 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
-    }
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
 }
 
-apply plugin: "com.jfrog.bintray"
-apply plugin: "maven-publish"
-apply plugin: "java"
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 
 group = 'com.github.kimble'
@@ -63,7 +58,8 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-    archives sourcesJar, javadocJar
+    archives javadocJar
+    archives sourcesJar
 }
 
 publishing {
@@ -82,29 +78,28 @@ publishing {
     }
 }
 
+
 if (System.getenv("BINTRAY_USER") && System.getenv("BINTRAY_KEY")) {
     bintray {
         user = System.getenv("BINTRAY_USER")
         key = System.getenv("BINTRAY_KEY")
+        configurations = ['archives']
 
         publications = [ 'mavenJava' ]
-
-        dryRun = false
-        publish = true
 
         pkg { //package will be created if does not exist
             repo = 'maven'
             name = 'junit-test-factory'
-            desc = 'Simple junit runner for dynamically generating tests'
+            desc = 'Dynamic generation of junit tests'
 
             websiteUrl = 'https://github.com/kimble/junit-test-factory'
             issueTrackerUrl = 'https://github.com/kimble/junit-test-factory/issues'
             vcsUrl = 'https://github.com/kimble/junit-test-factory.git'
             githubRepo = 'kimble/junit-test-factory'
-            githubReleaseNotesFile = 'readme.md'
+            githubReleaseNotesFile = 'README.md'
 
             licenses = ['Apache-2.0']
-            labels = ['java', 'junit', 'testing']
+            labels = ['java', 'xml', 'library']
 
             publicDownloadNumbers = true
         }
