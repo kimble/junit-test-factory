@@ -13,7 +13,7 @@ apply plugin: "java"
 
 
 group = 'com.github.kimble'
-version = '4.12.2'
+version = '4.12.3'
 
 repositories {
     jcenter()
@@ -21,9 +21,6 @@ repositories {
 
 dependencies {
     compile 'junit:junit:4.12'
-    compile 'org.apache.poi:poi:3.14',
-            'org.apache.poi:poi-ooxml:3.14'
-
     testCompile 'org.assertj:assertj-core:3.4.0'
 }
 
