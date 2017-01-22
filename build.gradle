@@ -1,5 +1,7 @@
 plugins {
     id "com.jfrog.bintray" version "1.7.3"
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
 apply plugin: 'java'
@@ -45,6 +47,13 @@ compileTestJava {
             "-Xlint:-fallthrough", "-Xlint:-rawtypes", "-Xlint:-deprecation",
             "-Xlint:-unchecked", "-Xlint:-options"
     ]
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
