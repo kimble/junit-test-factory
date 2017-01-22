@@ -2,6 +2,7 @@ package com.github.kimble;
 
 import org.junit.Test;
 import org.junit.runner.Description;
+import org.junit.runners.model.InitializationError;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -44,5 +45,13 @@ public class FactoryRunnerTest {
         }
 
     }
+
+
+    @Test(expected = InitializationError.class)
+    public void runners_should_specify_runner() throws Exception {
+        new FactoryRunner(RunnerNotImplementingInterface.class);
+    }
+
+    public static class RunnerNotImplementingInterface { }
 
 }
