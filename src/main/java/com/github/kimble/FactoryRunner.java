@@ -4,6 +4,7 @@ package com.github.kimble;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.internal.runners.statements.RunAfters;
@@ -12,10 +13,12 @@ import org.junit.rules.RunRules;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.junit.runners.model.TestClass;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -49,9 +52,14 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
     protected List<DescribedTest> getChildren() {
         Class<?> testClass = factoryInstance.getClass();
 
+
         try {
             factoryInstance.produceTests((name, test) -> {
                 Description description = Description.createTestDescription(testClass, name);
+
+
+
+                // Todo: Warn if test produces the same test twice
                 tests.add(new DescribedTest(description, test));
             });
         }
@@ -93,9 +101,9 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
         EachTestNotifier eachNotifier = new EachTestNotifier(notifier, describedTest.description());
         eachNotifier.fireTestStarted();
 
-        Statement statement = createStatement(describedTest);
 
         try {
+            Statement statement = createStatement(describedTest);
             statement.evaluate();
         }
         catch (AssumptionViolatedException ex) {
@@ -111,54 +119,60 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
 
 
 
-    private Statement createStatement(DescribedTest describedTest) {
-        Statement invokeTest = new GeneratedTestStatementAdapter(describedTest.test());
-        Statement withBefores = withBefores(invokeTest);
-        Statement withAfters = withAfters(withBefores);
+    private Statement createStatement(DescribedTest describedTest) throws InitializationError {
+        TestClass tk = getTestClass();
 
-        Description description = describedTest.description();
-        return withRules(description, withAfters);
+        GeneratedTestStatementAdapter invokeTest = new GeneratedTestStatementAdapter(describedTest.test());
+        Statement withBefores = withBefores(tk, invokeTest, factoryInstance);
+        Statement withAfters = withAfters(tk, withBefores, factoryInstance);
+        Statement outerRules = withRules(tk, describedTest.description(), withAfters, factoryInstance);
+
+        Statement withInnerBefores = withBefores(invokeTest.simlatedTestClass, outerRules, invokeTest.test);
+        Statement withInnerAfters = withAfters(invokeTest.simlatedTestClass, withInnerBefores, invokeTest.test);
+        return withRules(tk, describedTest.description(), withInnerAfters, factoryInstance);
     }
 
-    private Statement withBefores(Statement statement) {
-        List<FrameworkMethod> befores = methodsAnnotatedWith(Before.class);
+    private Statement withBefores(TestClass tk, Statement statement, Object target) {
+        List<FrameworkMethod> befores = methodsAnnotatedWith(tk, Before.class);
 
         if (befores.isEmpty()) {
             return statement;
         }
         else {
-            return new RunBefores(statement, befores, factoryInstance);
+            return new RunBefores(statement, befores, target);
         }
     }
 
-    private Statement withAfters(Statement statement) {
-        List<FrameworkMethod> afters = methodsAnnotatedWith(After.class);
+    private Statement withAfters(TestClass tk, Statement statement, Object target) {
+        List<FrameworkMethod> afters = methodsAnnotatedWith(tk, After.class);
 
         if (afters.isEmpty()) {
             return statement;
         }
         else {
-            return new RunAfters(statement, afters, factoryInstance);
+            return new RunAfters(statement, afters, target);
         }
     }
 
-    private RunRules withRules(Description description, Statement invokeTest) {
-        List<TestRule> result = getTestClass().getAnnotatedMethodValues(factoryInstance, Rule.class, TestRule.class);
-        result.addAll(getTestClass().getAnnotatedFieldValues(factoryInstance, Rule.class, TestRule.class));
+    private RunRules withRules(TestClass tk, Description description, Statement statement, Object target) {
+        List<TestRule> result = tk.getAnnotatedMethodValues(target, Rule.class, TestRule.class);
+        result.addAll(tk.getAnnotatedFieldValues(target, Rule.class, TestRule.class));
 
-        return new RunRules(invokeTest, result, description);
+        return new RunRules(statement, result, description);
     }
 
-    private List<FrameworkMethod> methodsAnnotatedWith(Class<? extends Annotation> annotationClass) {
-        return getTestClass().getAnnotatedMethods(annotationClass);
+    private List<FrameworkMethod> methodsAnnotatedWith(TestClass tk, Class<? extends Annotation> annotationClass) {
+        return tk.getAnnotatedMethods(annotationClass);
     }
 
 
     private static class GeneratedTestStatementAdapter extends Statement {
 
         private final Test test;
+        private final TestClass simlatedTestClass;
 
-        private GeneratedTestStatementAdapter(Test test) {
+        private GeneratedTestStatementAdapter(Test test) throws InitializationError {
+            this.simlatedTestClass = new TestClass(test.getClass());
             this.test = test;
         }
 
@@ -172,6 +186,7 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
     @FunctionalInterface
     public interface Test {
 
+        @org.junit.Test
         void execute() throws Throwable;
 
     }
@@ -179,7 +194,14 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
     @FunctionalInterface
     public interface Producer {
 
-        void produceTests(BiConsumer<String, Test> sink);
+        void produceTests(TestConsumer sink) throws Throwable;
+
+    }
+
+
+    public interface TestConsumer {
+
+        void accept(String name, Test test) throws Throwable;
 
     }
 

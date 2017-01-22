@@ -8,8 +8,6 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 
-import java.util.function.BiConsumer;
-
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -40,7 +38,7 @@ public class TestFactoryRunner implements FactoryRunner.Producer {
     }
 
     @Override
-    public void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
+    public void produceTests(FactoryRunner.TestConsumer sink) throws Throwable {
         for (int i=0; i<10; i++) {
             final int number = i;
             final String name = String.format("Test %d", number);

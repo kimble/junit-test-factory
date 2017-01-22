@@ -40,7 +40,7 @@ public class FactoryRunnerTest {
     public static class BadFactory implements FactoryRunner.Producer {
 
         @Override
-        public void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
+        public void produceTests(FactoryRunner.TestConsumer sink) throws Throwable {
             throw new IllegalStateException("Faen..");
         }
 
@@ -67,7 +67,7 @@ public class FactoryRunnerTest {
         }
 
         @Override
-        public void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
+        public void produceTests(FactoryRunner.TestConsumer sink) throws Throwable {
 
         }
 

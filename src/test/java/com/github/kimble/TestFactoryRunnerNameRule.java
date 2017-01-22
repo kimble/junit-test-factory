@@ -5,8 +5,6 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
-import java.util.function.BiConsumer;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -33,7 +31,7 @@ public class TestFactoryRunnerNameRule extends AbstractRunnerTest {
         public TestName name = new TestName();
 
         @Override
-        public void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
+        public void produceTests(FactoryRunner.TestConsumer sink) throws Throwable {
             sink.accept("The first test", () -> {
                 assertEquals("The first test", name.getMethodName());
             });

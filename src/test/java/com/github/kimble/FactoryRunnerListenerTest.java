@@ -23,13 +23,12 @@ public class FactoryRunnerListenerTest {
         CountingRunListener listener = new CountingRunListener();
         notifier.addListener(listener);
 
-        for (FactoryRunner.DescribedTest child : runner.getChildren()) {
-            runner.runChild(child, notifier);
-        }
+        runner.run(notifier);
 
         assertEquals("tests started", 3, listener.testsStarted);
         assertEquals("tests finished", 3, listener.testsFinished);
         assertEquals("tests failed", 1, listener.testFailures);
+
         assertEquals("assumptions failed", 1, listener.testsAssumptionFailed);
         assertEquals("tests ignored", 0, listener.testsIgnored);
     }
@@ -38,7 +37,7 @@ public class FactoryRunnerListenerTest {
     public static class Success implements FactoryRunner.Producer {
 
         @Override
-        public void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
+        public void produceTests(FactoryRunner.TestConsumer sink) throws Throwable {
             sink.accept("success", () -> { /* no problem */ });
             sink.accept("failure", () -> { fail("faen.."); });
             sink.accept("assumption", () -> { assumeTrue(false); });

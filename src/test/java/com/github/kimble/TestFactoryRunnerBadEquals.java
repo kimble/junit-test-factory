@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,7 +28,7 @@ public class TestFactoryRunnerBadEquals implements FactoryRunner.Producer {
     }
 
     @Override
-    public void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
+    public void produceTests(FactoryRunner.TestConsumer sink) throws Throwable {
         sink.accept("a", () -> { executed.add(testName.getMethodName()); });
         sink.accept("b", () -> { executed.add(testName.getMethodName()); });
     }
