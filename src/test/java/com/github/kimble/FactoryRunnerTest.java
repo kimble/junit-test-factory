@@ -55,4 +55,23 @@ public class FactoryRunnerTest {
 
     public static class RunnerNotImplementingInterface { }
 
+
+    @Test(expected = InitializationError.class)
+    public void init_exception_from_bad_constructor() throws Exception {
+        new FactoryRunner(BadConstructorFactory.class);
+    }
+
+    public static class BadConstructorFactory implements FactoryRunner.Producer {
+
+        public BadConstructorFactory() {
+            throw new IllegalStateException("Faen..");
+        }
+
+        @Override
+        public void produceTests(BiConsumer<String, FactoryRunner.Test> sink) {
+
+        }
+
+    }
+
 }
