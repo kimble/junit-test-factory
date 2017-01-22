@@ -130,7 +130,7 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
         // Invoke @Before, @After and @Rule on the dynamically produced test
         Statement withInnerBefores = withBefores(invokeTest.simlatedTestClass, outerRules, invokeTest.test);
         Statement withInnerAfters = withAfters(invokeTest.simlatedTestClass, withInnerBefores, invokeTest.test);
-        return withRules(tk, describedTest.description(), withInnerAfters, factoryInstance);
+        return withRules(invokeTest.simlatedTestClass, describedTest.description(), withInnerAfters, invokeTest.test);
     }
 
     private Statement withBefores(TestClass tk, Statement statement, Object target) {
