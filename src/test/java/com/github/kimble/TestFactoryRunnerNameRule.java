@@ -1,6 +1,7 @@
 package com.github.kimble;
 
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
@@ -11,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestFactoryRunnerNameRule extends AbstractRunnerTest {
 
-    @org.junit.Test
+    @Test
     public void canAccessTestNameRule() throws Exception {
         JournalingRunListener listener = runClass(TestClass.class);
 

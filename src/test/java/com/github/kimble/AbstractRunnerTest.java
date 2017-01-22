@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 abstract class AbstractRunnerTest {
 
-    protected JournalingRunListener runClass(Class<TestFactoryRunnerNameRule.TestClass> testClass) throws InitializationError {
+    JournalingRunListener runClass(Class<TestFactoryRunnerNameRule.TestClass> testClass) throws InitializationError {
         RunNotifier notifier = new RunNotifier();
         FactoryRunner runner = new FactoryRunner(testClass);
         JournalingRunListener listener = new JournalingRunListener();

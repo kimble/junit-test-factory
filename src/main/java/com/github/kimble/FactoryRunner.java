@@ -49,12 +49,30 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
     protected List<DescribedTest> getChildren() {
         Class<?> testClass = factoryInstance.getClass();
 
-        factoryInstance.produceTests((name, test) -> {
-            Description description = Description.createTestDescription(testClass, name);
-            tests.add(new DescribedTest(test, description));
-        });
+        try {
+            factoryInstance.produceTests((name, test) -> {
+                Description description = Description.createTestDescription(testClass, name);
+                tests.add(new DescribedTest(description, test));
+            });
+        }
+        catch (Throwable trouble) {
+            onTestProductionFailure(testClass, trouble);
+        }
 
         return tests;
+    }
+
+    /**
+     * This is a bit of a hack.. if we let the exception bubble up nobody will
+     * ever pick it up causing confusing. Instead we create a dummy test that will
+     * throw the exception when it is executed and thereby bringing it into the light.
+     */
+    private void onTestProductionFailure(Class<?> testClass, Throwable trouble) {
+        Description description = Description.createTestDescription(testClass, "test-production-failure");
+
+        tests.add(new DescribedTest(description, () -> {
+            throw new TestProductionFailure("Exception was thrown during 'produceTests' of " + testClass.getName(), trouble);
+        }));
     }
 
     @Override
@@ -165,12 +183,18 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
 
     }
 
+    public static class TestProductionFailure extends IllegalStateException {
+        TestProductionFailure(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
     static class DescribedTest {
 
         private final Test test;
         private final Description description;
 
-        DescribedTest(Test test, Description description) {
+        DescribedTest(Description description, Test test) {
             this.description = description;
             this.test = test;
         }
