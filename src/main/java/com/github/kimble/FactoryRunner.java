@@ -4,7 +4,6 @@ package com.github.kimble;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.internal.runners.statements.RunAfters;
@@ -13,7 +12,6 @@ import org.junit.rules.RunRules;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -23,7 +21,6 @@ import org.junit.runners.model.TestClass;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 
 public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
@@ -186,7 +183,6 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
     @FunctionalInterface
     public interface Test {
 
-        @org.junit.Test
         void execute() throws Throwable;
 
     }
