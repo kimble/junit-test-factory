@@ -3,6 +3,7 @@ JUnit test factory runner
 
 [ ![Download](https://api.bintray.com/packages/kim-betti/maven/junit-test-factory/images/download.svg) ](https://bintray.com/kim-betti/maven/junit-test-factory/_latestVersion)
 [![Build Status](https://app.snap-ci.com/kimble/junit-test-factory/branch/master/build_image)](https://app.snap-ci.com/kimble/junit-test-factory/branch/master)
+[![Coverage Status](https://coveralls.io/repos/github/kimble/junit-test-factory/badge.svg?branch=master)](https://coveralls.io/github/kimble/junit-test-factory?branch=master)
 
 Simple JUnit runner allowing you to dynamically generate tests with human readable names.
 This can be pretty convenient for adding customer generated test data into your test suites.
