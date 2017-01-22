@@ -7,7 +7,6 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 
 import static org.junit.Assert.assertEquals;
@@ -20,15 +19,13 @@ public class FactoryRunnerListenerTest {
     @Test
     public void listener() throws Exception {
         FactoryRunner runner = new FactoryRunner(Success.class);
-        List<FactoryRunner.DescribedTest> children = runner.getChildren();
-
         RunNotifier notifier = new RunNotifier();
         CountingRunListener listener = new CountingRunListener();
         notifier.addListener(listener);
 
-        runner.runChild(children.get(0), notifier);
-        runner.runChild(children.get(1), notifier);
-        runner.runChild(children.get(2), notifier);
+        for (FactoryRunner.DescribedTest child : runner.getChildren()) {
+            runner.runChild(child, notifier);
+        }
 
         assertEquals("tests started", 3, listener.testsStarted);
         assertEquals("tests finished", 3, listener.testsFinished);
