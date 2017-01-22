@@ -10,7 +10,7 @@ apply plugin: 'maven-publish'
 
 
 group = 'com.github.kimble'
-version = '4.12.4'
+version = '4.12.5'
 
 repositories {
     jcenter()

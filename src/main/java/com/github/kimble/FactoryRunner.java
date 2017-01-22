@@ -119,11 +119,15 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
     private Statement createStatement(DescribedTest describedTest) throws InitializationError {
         TestClass tk = getTestClass();
 
+        // This statement will invoke the actual test
         GeneratedTestStatementAdapter invokeTest = new GeneratedTestStatementAdapter(describedTest.test());
+
+        // Invoke @Before, @After and @Rule on the test factory instance
         Statement withBefores = withBefores(tk, invokeTest, factoryInstance);
         Statement withAfters = withAfters(tk, withBefores, factoryInstance);
         Statement outerRules = withRules(tk, describedTest.description(), withAfters, factoryInstance);
 
+        // Invoke @Before, @After and @Rule on the dynamically produced test
         Statement withInnerBefores = withBefores(invokeTest.simlatedTestClass, outerRules, invokeTest.test);
         Statement withInnerAfters = withAfters(invokeTest.simlatedTestClass, withInnerBefores, invokeTest.test);
         return withRules(tk, describedTest.description(), withInnerAfters, factoryInstance);
