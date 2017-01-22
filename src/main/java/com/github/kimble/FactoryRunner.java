@@ -207,11 +207,6 @@ public class FactoryRunner extends ParentRunner<FactoryRunner.DescribedTest> {
             return description;
         }
 
-        @Override
-        public String toString() {
-            return description.toString();
-        }
-
     }
 
 

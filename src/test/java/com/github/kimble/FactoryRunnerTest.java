@@ -21,7 +21,6 @@ public class FactoryRunnerTest {
         assertEquals("the only test is the one that will throw the already cought exception", 1, children.size());
 
         Description description = children.get(0).description();
-        assertEquals("test-production-failure(com.github.kimble.FactoryRunnerTest$BadFactory)", description.toString());
         assertEquals("test-production-failure", description.getMethodName());
         assertEquals("BadFactory", description.getTestClass().getSimpleName());
 
