@@ -15,28 +15,22 @@ Teaser
 
     package com.github.kimble;
 
-    import org.junit.runner.RunWith;
+    import com.github.kimble.FactoryRunner;
 
-    import java.util.function.BiConsumer;
-
-    import static org.junit.Assert.assertNotNull;
-    import static org.junit.Assert.assertTrue;
-
-    @RunWith(TestFactoryRunner.class)
-    public class TestFactoryRunnerTest implements TestFactory {
+    @RunWith(FactoryRunner.class)
+    public class TestFactoryRunnerTest implements FactoryRunner.Producer  {
 
         @Override
-        public void produceTests(BiConsumer<String, GeneratedTest> sink) {
+        public void produceTests(FactoryRunner.TestConsumer tc) throws Throwable {
             for (int i=0; i<10; i++) {
                 final int number = i;
                 final String name = String.format("Test %d", number);
 
-                sink.accept(name, () -> {
+                tc.accept(name, () -> {
                     System.out.println("This is test #" + number);
                 });
             }
         }
-
     }
     
 
